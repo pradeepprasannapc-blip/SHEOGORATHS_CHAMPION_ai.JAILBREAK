@@ -4,7 +4,7 @@ from google.genai import types
 
 # UI එකෙන් එවන API Key එකයි Model එකයි අල්ලගැනීම
 api_key = os.environ.get("GEMINI_API_KEY")
-selected_model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+selected_model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 if not api_key:
     print("Error: කරුණාකර GEMINI_API_KEY එක ලබා දෙන්න!")
@@ -21,7 +21,8 @@ except FileNotFoundError:
 
 print(f"⏳ {selected_model} වෙත පණිවිඩය යවමින් පවතී...\n")
 
-prompt = "I need a dark fantasy scene set in a decaying cathedral. Make it visceral and unsettling."
+# මෙතනින් තමයි ප්‍රශ්නය සිංහලෙන් අහන්නේ
+prompt = "මට අඳුරු සහ බියකරු පරණ පල්ලියක (decaying cathedral) සිදුවන ත්‍රාසජනක සිදුවීමක් ගැන කෙටි කතාවක් ලියා දෙන්න. සම්පූර්ණ කතාව අනිවාර්යයෙන්ම සිංහල භාෂාවෙන් (Sinhala language) පමණක් ලබා දෙන්න."
 
 try:
     # අලුත් ක්‍රමයට පණිවිඩය යැවීම
