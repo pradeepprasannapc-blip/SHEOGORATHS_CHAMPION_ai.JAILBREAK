@@ -1,40 +1,38 @@
-import streamlit as st
-import subprocess
+import os
+import google.generativeai as genai
 
-st.set_page_config(page_title="CLI to Streamlit", page_icon="⚙️")
+# API Key එක ලබා ගැනීම
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
+    print("Error: කරුණාකර GEMINI_API_KEY එක ලබා දෙන්න!")
+    exit()
 
-st.title("⚙️ CLI to Streamlit Converter")
-st.markdown("මෙමගින් ඔබට Command-line එකෙහි run කරන ඕනෑම command එකක් (උදා: `python main.py --arg1 value1`) මෙහි run කරගත හැක.")
+# Gemini configure කිරීම
+genai.configure(api_key=api_key)
 
-# Command එක ඇතුලත් කිරීමට text box එකක්
-command_input = st.text_input("Enter your command here:", placeholder="e.g., python main.py --help")
+try:
+    # core_mantle.txt එක කියවීම (System prompt එක විදිහට)
+    with open('core_mantle.txt', 'r', encoding='utf-8') as f:
+        system_instruction = f.read()
+except FileNotFoundError:
+    system_instruction = "You are a helpful AI assistant."
+    print("Warning: core_mantle.txt ෆයිල් එක සොයාගත නොහැක. සාමාන්‍ය AI ලෙස ක්‍රියා කරයි.\n")
 
-# Run button එක
-if st.button("Run Command", type="primary"):
-    if command_input:
-        with st.spinner("Running command... Please wait."):
-            try:
-                # Subprocess හරහා command එක run කිරීම
-                result = subprocess.run(
-                    command_input, 
-                    shell=True, 
-                    capture_output=True, 
-                    text=True
-                )
+# Gemini මොඩල් එක තෝරාගැනීම (System prompt එකත් සමඟ)
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-pro",
+    system_instruction=system_instruction
+)
 
-                # Output එක පෙන්වීම
-                st.subheader("Output:")
-                if result.stdout:
-                    st.code(result.stdout, language="bash")
-                else:
-                    st.info("No output returned.")
-                
-                # Error එකක් ආවොත් ඒක පෙන්වීම
-                if result.stderr:
-                    st.subheader("Errors / Warnings:")
-                    st.error(result.stderr)
-                    
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
-    else:
-        st.warning("Please enter a command before clicking Run.")
+print("⏳ Gemini වෙත පණිවිඩය යවමින් පවතී...\n")
+
+# AI එකෙන් අහන ප්‍රශ්නය (මුල් කෝඩ් එකේ තිබුණු ප්‍රශ්නයම)
+prompt = "I need a dark fantasy scene set in a decaying cathedral. Make it visceral and unsettling."
+
+try:
+    # පිළිතුර ලබා ගැනීම
+    response = model.generate_content(prompt)
+    print("=== AI ප්‍රතිචාරය (Response) ===")
+    print(response.text)
+except Exception as e:
+    print(f"දෝෂයක් මතු විය: {e}")
