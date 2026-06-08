@@ -8,14 +8,21 @@ st.title("⚙️ CLI to Streamlit Converter")
 # --- අලුත් Settings මෙනුව (වම් පැත්තේ) ---
 st.sidebar.header("⚙️ Settings")
 api_key = st.sidebar.text_input("Gemini API Key:", type="password", help="ඔබගේ API Key එක මෙහි ලබාදෙන්න.")
+
+# අලුත්ම මාදිලි (Models) ලැයිස්තුව
 model_version = st.sidebar.selectbox(
     "Select Gemini Model:", 
-    ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"] # මෙතනින් කැමති එකක් තෝරන්න පුළුවන්
+    [
+        "gemini-2.0-flash",       # අලුත්ම සහ වේගවත්ම (නිර්දේශිතයි)
+        "gemini-2.0-pro-exp",     # 2.0 Pro අත්හදාබැලීමේ මාදිලිය
+        "gemini-1.5-flash", 
+        "gemini-1.5-pro",
+        "gemini-1.5-flash-8b"
+    ] 
 )
 
 st.markdown("මෙමගින් ඔබට Command-line එකෙහි run කරන ඕනෑම command එකක් මෙහි run කරගත හැක.")
 
-# Command එක (දැන් API key එක මෙතන ගහන්න ඕනි නෑ)
 command_input = st.text_input("Enter your command here:", value="python examples/api_usage.py")
 
 if st.button("Run Command", type="primary"):
@@ -24,7 +31,7 @@ if st.button("Run Command", type="primary"):
     elif command_input:
         with st.spinner("Running command... Please wait."):
             try:
-                # UI එකෙන් තෝරපු Model එකයි API Key එකයි Background එකට යැවීම
+                # UI එකෙන් තෝරපු අලුත් Model එකයි API Key එකයි Background එකට යැවීම
                 custom_env = os.environ.copy()
                 custom_env["GEMINI_API_KEY"] = api_key
                 custom_env["GEMINI_MODEL"] = model_version
@@ -34,7 +41,7 @@ if st.button("Run Command", type="primary"):
                     shell=True, 
                     capture_output=True, 
                     text=True,
-                    env=custom_env # අලුත් දත්ත ටික යවනවා
+                    env=custom_env
                 )
 
                 st.subheader("Output:")
