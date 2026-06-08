@@ -2,53 +2,50 @@ import streamlit as st
 import subprocess
 import os
 
-st.set_page_config(page_title="CLI to Streamlit", page_icon="⚙️")
-st.title("⚙️ CLI to Streamlit Converter")
+st.set_page_config(page_title="සිංහල AI Chat", page_icon="🤖")
+st.title("🤖 මගේ AI සහායකයා")
 
-# --- අලුත් Settings මෙනුව ---
 st.sidebar.header("⚙️ Settings")
-api_key = st.sidebar.text_input("Gemini API Key:", type="password", help="ඔබගේ API Key එක මෙහි ලබාදෙන්න.")
-
-# නොමිලේ වැඩ කරන අලුත්ම මාදිලි ලැයිස්තුව
+api_key = st.sidebar.text_input("Gemini API Key:", type="password")
 model_version = st.sidebar.selectbox(
     "Select Gemini Model:", 
-    [
-        "gemini-2.5-flash",       # දැනට නොමිලේ වැඩ කරන ප්‍රධාන මාදිලිය
-        "gemini-2.5-flash-lite",  # ඉතා වේගවත් සහ සැහැල්ලු මාදිලිය
-        "gemini-3.1-pro",         # අලුත්ම Preview මාදිලිය
-    ] 
+    ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.1-pro"] 
 )
 
-st.markdown("මෙමගින් ඔබට Command-line එකෙහි run කරන ඕනෑම command එකක් මෙහි run කරගත හැක.")
+st.markdown("ඔබට දැනගැනීමට අවශ්‍ය ඕනෑම දෙයක් පහතින් සිංහලෙන් type කර අසන්න.")
 
-command_input = st.text_input("Enter your command here:", value="python examples/api_usage.py")
+# ප්‍රශ්නය අහන පෙට්ටිය
+user_prompt = st.text_area("ඔබේ ප්‍රශ්නය මෙහි ඇතුළත් කරන්න:", height=100)
 
-if st.button("Run Command", type="primary"):
+if st.button("අසන්න / Send", type="primary"):
     if not api_key:
         st.warning("⚠️ කරුණාකර වම් පස ඇති Settings මෙනුවෙන් API Key එක ලබා දෙන්න.")
-    elif command_input:
-        with st.spinner("Running command... Please wait."):
+    elif not user_prompt:
+        st.warning("⚠️ කරුණාකර ප්‍රශ්නයක් ඇතුළත් කරන්න.")
+    else:
+        with st.spinner("පිළිතුර සකසමින් පවතී... කරුණාකර රැඳී සිටින්න."):
             try:
+                # ඔයා අහන ප්‍රශ්නය Background එකෙන් කෝඩ් එකට යවනවා
                 custom_env = os.environ.copy()
                 custom_env["GEMINI_API_KEY"] = api_key
                 custom_env["GEMINI_MODEL"] = model_version
+                custom_env["USER_PROMPT"] = user_prompt 
 
+                # මෙතනදි අපි command එක ස්වයංක්‍රීයව run කරනවා
                 result = subprocess.run(
-                    command_input, 
+                    "python examples/api_usage.py", 
                     shell=True, 
                     capture_output=True, 
                     text=True,
                     env=custom_env
                 )
 
-                st.subheader("Output:")
+                st.subheader("පිළිතුර:")
                 if result.stdout:
-                    st.code(result.stdout, language="bash")
-                else:
-                    st.info("No output returned.")
+                    # උත්තරේ ලස්සනට කියවන්න පුළුවන් විදිහට පෙන්නනවා
+                    st.markdown(result.stdout)
                 
                 if result.stderr:
-                    st.subheader("Errors / Warnings:")
                     st.error(result.stderr)
                     
             except Exception as e:
